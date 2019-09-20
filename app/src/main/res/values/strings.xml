@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Offline Phone Finder</string>
+    <string name="log_in_message">Log In</string>
+</resources>
