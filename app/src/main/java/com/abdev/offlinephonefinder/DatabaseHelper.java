@@ -2,44 +2,51 @@ package com.abdev.offlinephonefinder;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
+    //Logcat tag
+    private static final String LOG = "DatabaseHelper";
+
+    //Database version
+    private static final int DATABASE_VERSION = 1;
+
     //Database name
     private static final String DATABASE_NAME = "Finder.db";
 
     //User table  name
-    public static final String TABLE_USER = "user";
+    private static final String TABLE_USER = "user";
 
     //User columns
-    public static final String COLUMN_USER_ID = "user_id";
-    public static final String COLUMN_USER_EMAIL = "email";
-    public static final String COLUMN_USER_PASSWORD = "password";
+    private static final String COLUMN_USER_ID = "user_id";
+    private static final String COLUMN_USER_EMAIL = "email";
+    private static final String COLUMN_USER_PASSWORD = "password";
 
     //Codes table name
-    public static final String TABLE_CODES = "codes";
+    private static final String TABLE_CODES = "codes";
 
     //Codes columns
-    public static final String COLUMN_CODES_ID = "code_id";
-    public static final String COLUMN_CODES_CODE = "code";
-    public static final String COLUMN_CODES_FEATURE = "feature";
-    public static final String COLUMN_CODES_USER_ID = "user_id";
+    private static final String COLUMN_CODES_ID = "code_id";
+    private static final String COLUMN_CODES_CODE = "code";
+    private static final String COLUMN_CODES_FEATURE = "feature";
+    private static final String COLUMN_CODES_USER_ID = "user_id";
 
 
     //Create user table statement
-    public static final String CREATE_TABLE_USER = "CREATE TABLE " + TABLE_USER + "(" + COLUMN_USER_ID + " INT PRIMARY KEY AUTOINCREMENT, " + COLUMN_USER_EMAIL
+    private static final String CREATE_TABLE_USER = "CREATE TABLE " + TABLE_USER + "(" + COLUMN_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + COLUMN_USER_EMAIL
             + " TEXT, " + COLUMN_USER_PASSWORD + " TEXT)";
 
     //Create codes table statement
-    public static final String CREATE_TABLE_CODES = "CREATE TABLE " + TABLE_CODES + "(" + COLUMN_CODES_ID + " INT PRIMARY KEY AUTOINCREMENT, " + COLUMN_CODES_CODE
+    private static final String CREATE_TABLE_CODES = "CREATE TABLE " + TABLE_CODES + "(" + COLUMN_CODES_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + COLUMN_CODES_CODE
             + " TEXT, " +  COLUMN_CODES_FEATURE + " TEXT, " + COLUMN_CODES_USER_ID + " INT, FOREIGN KEY(" + COLUMN_CODES_USER_ID + ") REFERENCES "
             + TABLE_USER + "(" + COLUMN_USER_ID + "))";
 
     private static final SQLiteDatabase.CursorFactory factory = null;
-    private static final int DATABASE_VERSION = 1;
+
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, factory, DATABASE_VERSION);
@@ -67,14 +74,76 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
-    public boolean insertUser(String email, String password){
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("email", email);
-        contentValues.put("password", password);
-        long ins = db.insert("user", null, contentValues);
+//    public long createUser(User user){
+//        SQLiteDatabase db = this.getWritableDatabase();
+//
+//        ContentValues values = new ContentValues();
+//        values.put(COLUMN_USER_EMAIL, user.getEmail());
+//        values.put(COLUMN_USER_PASSWORD, user.getPassword());
+//
+//        //Insert row
+//        long user_id = db.insert(TABLE_USER, null, values);
+//        return user_id;
+//    }
+//
+//    public long createCode(Code code){
+//        SQLiteDatabase db = this.getWritableDatabase();
+//
+//        ContentValues values = new ContentValues();
+//        values.put(COLUMN_CODES_CODE, code.getCode());
+//        values.put(COLUMN_CODES_FEATURE, code.getFeature());
+//        values.put(COLUMN_CODES_USER_ID, code.getUserID());
+//        long code_id = db.insert(TABLE_CODES, null, values);
+//        return code_id;
+//    }
 
-        if(ins == -1) return false;
-        else return true;
+    public boolean createUser(String email, String password){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_USER_EMAIL, email);
+        values.put(COLUMN_USER_PASSWORD, password);
+        db.beginTransaction();
+        long ins = db.insert(TABLE_USER, null, values);
+
+        db.execSQL("INSERT INTO " + TABLE_CODES + "(" + COLUMN_CODES_FEATURE + ") VALUES('Location Retrieval')");
+        db.execSQL("INSERT INTO " + TABLE_CODES + "(" + COLUMN_CODES_FEATURE + ") VALUES('Contact Retrieval')");
+        db.execSQL("INSERT INTO " + TABLE_CODES + "(" + COLUMN_CODES_FEATURE + ") VALUES('Enable Ringer')");
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        //populateCodes();
+        if(ins == -1)
+            return false;
+        else
+            return true;
+    }
+
+//    public void populateCodes(){
+//        SQLiteDatabase db =  this.getWritableDatabase();
+//        ContentValues values = new ContentValues();
+//        values.put(COLUMN_CODES_FEATURE, "Location Retrieval");
+//        value.put
+//        long insertFeature = db.insert(TABLE_CODES, null, values);
+//
+//        db = this.getWritableDatabase();
+//        ContentValues values2 = new ContentValues();
+//        values.put(COLUMN_CODES_FEATURE, "Contact Retrieval");
+//        long insertFeature2 = db.insert(TABLE_CODES, null, values2);
+//
+//        db = this.getWritableDatabase();
+//        ContentValues values3 = new ContentValues();
+//        values.put(COLUMN_CODES_FEATURE, "Enable Ringer");
+//        long insertFeature3 = db.insert(TABLE_CODES, null, values3);
+//        //TODO: foreign key retrieval and insertion
+//
+//    }
+
+
+    //Checking if email exists
+    public Boolean checkEmail(String email){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM user WHERE email = ?", new String[]{email});
+        return cursor.getCount() <= 0;
+
     }
 }

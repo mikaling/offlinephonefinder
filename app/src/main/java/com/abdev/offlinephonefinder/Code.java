@@ -4,6 +4,15 @@ public class Code {
     private int codeID;
     private String feature;
     private String code;
+    private int userID;
+
+    public int getUserID() {
+        return userID;
+    }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
 
     public Code() {
     }

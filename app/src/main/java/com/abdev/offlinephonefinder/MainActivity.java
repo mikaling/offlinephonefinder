@@ -1,38 +1,46 @@
 package com.abdev.offlinephonefinder;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    DatabaseHelper db;
-    EditText emailEditText, passwordEditText, confirmPasswordEditText;
-    Button registerButton;
-    TextView logInTextView;
+
+    Button signIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        db = new DatabaseHelper(this);
-        emailEditText = (EditText) findViewById(R.id.email);
-        passwordEditText = (EditText) findViewById(R.id.password);
-        confirmPasswordEditText = (EditText) findViewById(R.id.confirmPassword);
-        registerButton = (Button) findViewById(R.id.register);
-        logInTextView = (TextView) findViewById(R.id.logIn);
+        signIn = findViewById(R.id.next);
+//        signIn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent i = new Intent(MainActivity.this, RegisterActivity.class);
+//                startActivity(i);
+//                finish();
+//            }
+//        });
+        //Checking if app has run before
+        SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+        boolean firstStart = prefs.getBoolean("firstStart", true);
+        if(firstStart){
+            Intent i = new Intent(MainActivity.this, RegisterActivity.class);
+            startActivity(i);
+            finish();
+            SharedPreferences prefs2 = getSharedPreferences("prefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs2.edit();
+            editor.putBoolean("firstStart", false);
+            editor.apply();
+        }
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String email = emailEditText.getText().toString();
-                String password = passwordEditText.getText().toString();
-                String confirmPassword = confirmPasswordEditText.getText().toString();
-            }
-        });
+
+
     }
 }
