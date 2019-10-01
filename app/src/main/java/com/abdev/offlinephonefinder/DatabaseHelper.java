@@ -16,7 +16,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
     //Database name
-    private static final String DATABASE_NAME = "Finder.db";
+    public static final String DATABASE_NAME = "Finder.db";
 
     //User table  name
     private static final String TABLE_USER = "user";
@@ -27,13 +27,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_USER_PASSWORD = "password";
 
     //Codes table name
-    private static final String TABLE_CODES = "codes";
+    public static final String TABLE_CODES = "codes";
 
     //Codes columns
-    private static final String COLUMN_CODES_ID = "code_id";
-    private static final String COLUMN_CODES_CODE = "code";
-    private static final String COLUMN_CODES_FEATURE = "feature";
-    private static final String COLUMN_CODES_USER_ID = "user_id";
+    public static final String COLUMN_CODES_ID = "code_id";
+    public static final String COLUMN_CODES_CODE = "code";
+    public static final String COLUMN_CODES_FEATURE = "feature";
+    public static final String COLUMN_CODES_USER_ID = "user_id";
 
 
     //Create user table statement
