@@ -31,16 +31,19 @@ import androidx.core.content.ContextCompat;
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
 
-    //Button signIn;
+
+
     DatabaseHelper databaseHelper;
     SQLiteDatabase sqLiteDatabase;
     Cursor cursor;
+    Cursor cursor2;
     MyListAdapter myListAdapter;
     ListView LISTVIEW;
 
     ArrayList<String> ID_Array;
     ArrayList<String> FEATURE_Array;
     ArrayList<String> CODE_Array;
+    ArrayList<String> codesArray = new ArrayList<String>();
 
     ArrayList<String> ListViewClickItemArray = new ArrayList<String>();
     String TempHolder;
@@ -48,6 +51,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     Intent j;
     String Sender;
     String messageBody;
+    String locCode;
+    String contactCode;
+    String ringCode;
+    String code;
     protected LocationManager locationManager;
     protected boolean gps_enabled, network_enabled;
 
@@ -62,16 +69,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkAndRequestPermissions();
-        //signIn = findViewById(R.id.next);
-//        signIn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent i = new Intent(MainActivity.this, RegisterActivity.class);
-//                startActivity(i);
-//                finish();
-//            }
-//        });
+
+
         //Checking if app has run before
+        //If first run, register new user.
         SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
         boolean firstStart = prefs.getBoolean("firstStart", true);
         if(firstStart){
@@ -110,7 +111,23 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
         if (messageBody != null){
-            if(messageBody.equalsIgnoreCase("Test")){
+            //Getting codes from database
+            databaseHelper = new DatabaseHelper(this);
+            sqLiteDatabase = databaseHelper.getWritableDatabase();
+            cursor2  = sqLiteDatabase.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_CODES + "", null);
+            codesArray.clear();
+            if(cursor2.moveToFirst()){
+                do{
+                    codesArray.add(cursor2.getString(cursor2.getColumnIndex(DatabaseHelper.COLUMN_CODES_CODE)));
+                } while(cursor2.moveToNext());
+            }
+
+            locCode = codesArray.get(0);
+            contactCode = codesArray.get(1);
+            ringCode = codesArray.get(2);
+            //Checking code in message against codes from database
+            code = messageBody.substring(5);
+            if(code.equalsIgnoreCase(locCode)){
                 if (network_enabled) {
 
                     locationManager.requestLocationUpdates(
@@ -140,7 +157,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private void ShowSQLiteDBdata(){
         sqLiteDatabase = databaseHelper.getWritableDatabase();
         cursor  = sqLiteDatabase.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_CODES + "", null);
-
         ID_Array.clear();
         FEATURE_Array.clear();
         CODE_Array.clear();
@@ -162,21 +178,42 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         LISTVIEW.setAdapter(myListAdapter);
         cursor.close();
+        //Toast.makeText(this, "notworked", Toast.LENGTH_SHORT).show();
     }
 
 
     @Override
     public void onLocationChanged(Location location) {
+        //Toast.makeText(this, "notworked", Toast.LENGTH_SHORT).show();
         Log.e("location change","location");
         Intent i = getIntent();
         double lat = location.getLatitude();
         String sender = getIntent().getStringExtra("sender");
         String message =getIntent().getStringExtra("message");
-        if(message.equalsIgnoreCase("Test"))
+
+//        //Getting codes from database
+//        sqLiteDatabase = databaseHelper.getWritableDatabase();
+//        cursor2  = sqLiteDatabase.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_CODES + "", null);
+//
+//        if(cursor2.moveToFirst()){
+//            do{
+//                codesArray.add(cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_CODES_CODE)));
+//            } while(cursor.moveToNext());
+//        }
+//
+//        String locCode = codesArray.get(0);
+//        String contactCode = codesArray.get(1);
+//        String ringCode = codesArray.get(2);
+//        //Checking code in message against codes from database
+//        String code = message.substring(5);
+        //Toast.makeText(this, code, Toast.LENGTH_SHORT).show();
+        if(code.equalsIgnoreCase(locCode))
             smsManager.sendTextMessage(sender, null, "http://maps.google.com/maps?q="+location.getLatitude()+","+location.getLongitude(), null, null);
-        else if(message.equalsIgnoreCase("ringer")){
+        else if(code.equalsIgnoreCase(ringCode)){
             AudioManager audio_mngr = (AudioManager) getBaseContext().getSystemService(Context.AUDIO_SERVICE);
             audio_mngr .setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+        }else{
+            //Toast.makeText(this, "notworked", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -199,7 +236,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         j = getIntent();
         String sender = getIntent().getStringExtra("sender");
         messageBody = getIntent().getStringExtra("message");
-        Sender =sender;
+
+        Sender = sender;
 
 
     }
@@ -236,8 +274,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             ActivityCompat.requestPermissions(this,
                     listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]),
                     101);
-            //return false;
+
         }
-        //return true;
+
     }
 }

@@ -9,6 +9,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.Cursor;
+import java.util.ArrayList;
 
 public class MyReceiver extends BroadcastReceiver {
     private static final String SMS_Received="android.provider.Telephony.SMS_RECEIVED";
@@ -20,10 +23,33 @@ public class MyReceiver extends BroadcastReceiver {
     protected LocationManager locationManager;
     protected boolean gps_enabled, network_enabled;
 
+    DatabaseHelper databaseHelper;
+
+    SQLiteDatabase database;
+    Cursor cursor;
+    ArrayList<String> codesArray;
+    private String locationCode;
+    private String contactCode;
+    private String ringerCode;
+
+
     @SuppressLint("MissingPermission")
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.i(TAG,"intent received:"+intent.getAction());
+//        databaseHelper = new DatabaseHelper(MainActivity.appContext);
+//        database = databaseHelper.getWritableDatabase();
+//        cursor  = database.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_CODES + "", null);
+//
+//        if(cursor.moveToFirst()){
+//            do{
+//                codesArray.add(cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_CODES_CODE)));
+//            } while(cursor.moveToNext());
+//        }
+
+
+
+
         if(intent.getAction()==SMS_Received){
             Bundle dataBundle = intent.getExtras();
             if(dataBundle !=null){
@@ -45,7 +71,9 @@ public class MyReceiver extends BroadcastReceiver {
                     //String message =msg;
                 }
 
-                if(msg.equalsIgnoreCase("Test") || msg.equalsIgnoreCase("ringer")){
+                String appCode = msg.substring(0,5);
+
+                if(appCode.equalsIgnoreCase("<OPF>")){
                     Intent intentCall = new Intent(context, MainActivity.class);
 
                     intentCall.putExtra("message", msg);
