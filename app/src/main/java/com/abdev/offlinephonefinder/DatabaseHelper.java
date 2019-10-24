@@ -111,32 +111,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.setTransactionSuccessful();
         db.endTransaction();
-        //populateCodes();
+
         if(ins == -1)
             return false;
         else
             return true;
     }
 
-//    public void populateCodes(){
-//        SQLiteDatabase db =  this.getWritableDatabase();
-//        ContentValues values = new ContentValues();
-//        values.put(COLUMN_CODES_FEATURE, "Location Retrieval");
-//        value.put
-//        long insertFeature = db.insert(TABLE_CODES, null, values);
-//
-//        db = this.getWritableDatabase();
-//        ContentValues values2 = new ContentValues();
-//        values.put(COLUMN_CODES_FEATURE, "Contact Retrieval");
-//        long insertFeature2 = db.insert(TABLE_CODES, null, values2);
-//
-//        db = this.getWritableDatabase();
-//        ContentValues values3 = new ContentValues();
-//        values.put(COLUMN_CODES_FEATURE, "Enable Ringer");
-//        long insertFeature3 = db.insert(TABLE_CODES, null, values3);
-//        //TODO: foreign key retrieval and insertion
-//
-//    }
+
 
 
     //Checking if email exists

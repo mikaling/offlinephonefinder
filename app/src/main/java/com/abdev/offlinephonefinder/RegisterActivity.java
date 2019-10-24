@@ -3,6 +3,7 @@ package com.abdev.offlinephonefinder;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -41,6 +42,10 @@ public class RegisterActivity extends AppCompatActivity {
                         if(checkEmail){
                             Boolean insert = db.createUser(email, password);
                             if(insert){
+                                SharedPreferences prefs3 = getSharedPreferences("prefs", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = prefs3.edit();
+                                editor.putString("password", password);
+                                editor.apply();
                                 Toast.makeText(getApplicationContext(), "Registered successfully", Toast.LENGTH_SHORT).show();
                                 Intent i = new Intent(RegisterActivity.this, MainActivity.class);
                                 startActivity(i);

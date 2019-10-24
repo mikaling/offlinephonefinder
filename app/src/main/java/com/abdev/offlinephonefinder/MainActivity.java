@@ -2,7 +2,9 @@ package com.abdev.offlinephonefinder;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -12,18 +14,28 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.telephony.SmsManager;
+import android.text.Editable;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.database.Cursor;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -39,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     Cursor cursor2;
     MyListAdapter myListAdapter;
     ListView LISTVIEW;
+    RelativeLayout relativeLayout;
 
     ArrayList<String> ID_Array;
     ArrayList<String> FEATURE_Array;
@@ -55,17 +68,28 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     String contactCode;
     String ringCode;
     String code;
+    String codeSpecial;
+    String typedPassword;
+    Boolean correctPassword;
     protected LocationManager locationManager;
+    protected LocationListener locationListener;
     protected boolean gps_enabled, network_enabled;
-
+    public boolean firstClick = false;
     // The minimum distance to change Updates in meters
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
     // The minimum time between updates in milliseconds
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
 
+    //EditText that appears in password dialog
+//    EditText input;
+    public int pos = 0;
+    public AlertDialog.Builder builder;
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        builder  = new AlertDialog.Builder(MainActivity.this);
+//        input = new EditText(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkAndRequestPermissions();
@@ -84,21 +108,91 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             editor.putBoolean("firstStart", false);
             editor.apply();
         }
-
+        relativeLayout = new RelativeLayout(getApplicationContext());
         LISTVIEW = (ListView) findViewById(R.id.listView1);
         ID_Array = new ArrayList<String>();
         FEATURE_Array = new ArrayList<String>();
         CODE_Array = new ArrayList<String>();
         databaseHelper = new DatabaseHelper(this);
+        //Alert dialog asks for password before proceeding
+//        public AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+
+//        builder.setTitle("Enter Password");
+//        builder.setMessage("Please enter your password");
+//        builder.setView(input);
+//        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int i) {
+//                Editable typedPasswordE = input.getText();
+//                typedPassword = typedPasswordE.toString();
+//                SharedPreferences preferences = getSharedPreferences("prefs", MODE_PRIVATE);
+//                String password = preferences.getString("password", null);
+//                //int pos = position;
+//
+//                if (typedPassword.equals(password)){
+//                    correctPassword = true;
+//                    if(pos != 0){
+//                        Intent intent = new Intent(getApplicationContext(), EditCode.class);
+//                        intent.putExtra("ListViewClickedItemValue", ListViewClickItemArray.get(pos).toString());
+//                        startActivity(intent);
+//                    }
+//
+//                }else{
+//                    correctPassword = false;
+////                    Toast.makeText(MainActivity.this, "Wrong password, try again", Toast.LENGTH_SHORT).show();
+////                    Toast.makeText(MainActivity.this, typedPassword, Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
+//        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int i) {
+//
+//            }
+//        });
+
+        //final AlertDialog passwordAlert = builder.create();
 
         LISTVIEW.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Intent intent = new Intent(getApplicationContext(), EditCode.class);
-                intent.putExtra("ListViewClickedItemValue", ListViewClickItemArray.get(position).toString());
-                startActivity(intent);
-            }
+            public void onItemClick(AdapterView<?> adapterView, View view, final int position, long id) {
+                pos = position;
+                build(position).show();
+
+
+                //passwordAlert.show();
+
+                //while (correctPassword != null){
+//                    if(correctPassword){
+//                        //Toast.makeText(MainActivity.this, "time", Toast.LENGTH_SHORT).show();
+//
+//                        Intent intent = new Intent(getApplicationContext(), EditCode.class);
+//                        intent.putExtra("ListViewClickedItemValue", ListViewClickItemArray.get(position).toString());
+//                        startActivity(intent);
+//                        input.getText().clear();
+//                        correctPassword = null;
+//                        //break;
+//                    }else{
+//                        Toast.makeText(MainActivity.this, "Wrong password, try again", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MainActivity.this, typedPassword, Toast.LENGTH_SHORT).show();
+//                        input.getText().clear();
+//                        correctPassword = null;
+                    }
+                //}
+
+                //
+//                if (correctPassword){
+//                    Intent intent = new Intent(getApplicationContext(), EditCode.class);
+//                    intent.putExtra("ListViewClickedItemValue", ListViewClickItemArray.get(position).toString());
+//                    startActivity(intent);
+//                }else{
+//                    Toast.makeText(MainActivity.this, "Wrong password, try again", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(MainActivity.this, typedPassword, Toast.LENGTH_SHORT).show();
+//                }
+
+            //}
         });
 
         checkIntent();
@@ -127,23 +221,41 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             ringCode = codesArray.get(2);
             //Checking code in message against codes from database
             code = messageBody.substring(5);
+            if(messageBody.contains(" ")){
+                codeSpecial = messageBody.substring(5, messageBody.indexOf(" "));
+            }
+
             if(code.equalsIgnoreCase(locCode)){
                 if (network_enabled) {
 
                     locationManager.requestLocationUpdates(
                             LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES,
                             MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                }else{
+                    locationManager.requestLocationUpdates(
+                            LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                 }
-                locationManager.requestLocationUpdates(
-                        LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                locationManager.requestLocationUpdates(
-                        LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+
+//                locationManager.requestLocationUpdates(
+//                        LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES,
+//                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
 
 
 
+            }else if(codeSpecial.equalsIgnoreCase(contactCode)){
+                Toast.makeText(this, "hereee", Toast.LENGTH_SHORT).show();
+                String name= messageBody.substring(messageBody.indexOf(" ")+1);
+                smsManager.sendTextMessage(Sender, null, ""+fetchContacts(name), null, null);
+                getIntent().removeExtra("sender");
+                getIntent().removeExtra("message");
+                this.finishAffinity();
+            }else if(code.equalsIgnoreCase(ringCode)){
+                AudioManager audio_mngr = (AudioManager) getBaseContext().getSystemService(Context.AUDIO_SERVICE);
+                audio_mngr .setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                this.finishAffinity();
             }
+
         }
 
     }
@@ -182,6 +294,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void onLocationChanged(Location location) {
         //Toast.makeText(this, "notworked", Toast.LENGTH_SHORT).show();
@@ -191,35 +304,26 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         String sender = getIntent().getStringExtra("sender");
         String message =getIntent().getStringExtra("message");
 
-//        //Getting codes from database
-//        sqLiteDatabase = databaseHelper.getWritableDatabase();
-//        cursor2  = sqLiteDatabase.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE_CODES + "", null);
-//
-//        if(cursor2.moveToFirst()){
-//            do{
-//                codesArray.add(cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_CODES_CODE)));
-//            } while(cursor.moveToNext());
-//        }
-//
-//        String locCode = codesArray.get(0);
-//        String contactCode = codesArray.get(1);
-//        String ringCode = codesArray.get(2);
-//        //Checking code in message against codes from database
-//        String code = message.substring(5);
-        //Toast.makeText(this, code, Toast.LENGTH_SHORT).show();
-        if(code.equalsIgnoreCase(locCode))
+
+
             smsManager.sendTextMessage(sender, null, "http://maps.google.com/maps?q="+location.getLatitude()+","+location.getLongitude(), null, null);
-        else if(code.equalsIgnoreCase(ringCode)){
-            AudioManager audio_mngr = (AudioManager) getBaseContext().getSystemService(Context.AUDIO_SERVICE);
-            audio_mngr .setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-        }else{
-            //Toast.makeText(this, "notworked", Toast.LENGTH_SHORT).show();
-        }
+        //this.finishAffinity();
+//        finish();
+//        System.exit(0);
+        stopLocationUpdates();
     }
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
 
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    public void stopLocationUpdates(){
+        locationManager.removeUpdates(this);
+        //this.finishAffinity();
+        finish();
+        System.exit(0);
     }
 
     @Override
@@ -232,6 +336,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
+
+
     private void checkIntent() {
         j = getIntent();
         String sender = getIntent().getStringExtra("sender");
@@ -242,6 +348,48 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
+    public AlertDialog build(final int position){
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            builder.setTitle("Enter Password");
+            builder.setMessage("Please enter your password");
+            builder.setView(input);
+
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Editable typedPasswordE = input.getText();
+                typedPassword = typedPasswordE.toString();
+                SharedPreferences preferences = getSharedPreferences("prefs", MODE_PRIVATE);
+                String password = preferences.getString("password", null);
+                //int pos = position;
+
+                if (typedPassword.equals(password)){
+                    correctPassword = true;
+
+                        Intent intent = new Intent(getApplicationContext(), EditCode.class);
+                        intent.putExtra("ListViewClickedItemValue", ListViewClickItemArray.get(position).toString());
+                        startActivity(intent);
+
+
+                }else{
+                    correctPassword = false;
+                   Toast.makeText(MainActivity.this, "Wrong password, try again", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(MainActivity.this, typedPassword, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        final AlertDialog passwordAlert = builder.create();
+        return passwordAlert;
+    }
+
     private void checkAndRequestPermissions() {
         int permissionSendMessage = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.SEND_SMS);
@@ -249,6 +397,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         int receiveSMS = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.RECEIVE_SMS);
 
+        int readContact = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS);
 
         int coarseLocation = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -270,6 +420,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             listPermissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
         }
 
+        if (readContact != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.READ_CONTACTS);
+        }
+
         if (!listPermissionsNeeded.isEmpty()) {
             ActivityCompat.requestPermissions(this,
                     listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]),
@@ -277,5 +431,62 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         }
 
+    }
+
+    public String fetchContacts(String Name) {
+
+        String phoneNumber = null;
+
+
+        Uri CONTENT_URI = ContactsContract.Contacts.CONTENT_URI;
+        String _ID = ContactsContract.Contacts._ID;
+        String DISPLAY_NAME = ContactsContract.Contacts.DISPLAY_NAME;
+        String HAS_PHONE_NUMBER = ContactsContract.Contacts.HAS_PHONE_NUMBER;
+
+        Uri PhoneCONTENT_URI = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+        String Phone_CONTACT_ID = ContactsContract.CommonDataKinds.Phone.CONTACT_ID;
+        String NUMBER = ContactsContract.CommonDataKinds.Phone.NUMBER;
+
+
+
+        StringBuffer output = new StringBuffer();
+
+        ContentResolver contentResolver = getContentResolver();
+
+        Cursor cursor = contentResolver.query(CONTENT_URI, null,null, null, null);
+
+        // Loop for every contact in the phone
+        if (cursor.getCount() > 0) {
+
+            while (cursor.moveToNext()) {
+
+                String contact_id = cursor.getString(cursor.getColumnIndex( _ID ));
+                String name = cursor.getString(cursor.getColumnIndex( DISPLAY_NAME ));
+
+                int hasPhoneNumber = Integer.parseInt(cursor.getString(cursor.getColumnIndex( HAS_PHONE_NUMBER )));
+
+                if (hasPhoneNumber > 0) {
+                    if(name.equalsIgnoreCase(Name)){
+                        Cursor phoneCursor = contentResolver.query(PhoneCONTENT_URI, null, Phone_CONTACT_ID + " = ?", new String[] { contact_id }, null);
+
+                        while (phoneCursor.moveToNext()) {
+                            phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(NUMBER));
+                            return phoneNumber;
+
+                        }
+
+                        phoneCursor.close();
+                    }
+
+
+                    // Query and loop for every phone number of the contact
+
+
+                }
+
+            }
+
+        }
+        return "not found";
     }
 }
