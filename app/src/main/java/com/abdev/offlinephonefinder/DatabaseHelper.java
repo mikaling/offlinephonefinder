@@ -118,6 +118,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return true;
     }
 
+    public boolean changePassword(String password){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_USER_PASSWORD, password);
+        db.beginTransaction();
+        //long ins = db.insert(TABLE_USER, null, values);
+        int upd = db.update(TABLE_USER, values, null, null);
+        //db.execSQL("UPDATE " + TABLE_USER + "(" + COLUMN_USER_PASSWORD + ") VALUES('Contact Retrieval')");
+
+
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+
+        if(upd == 0)
+            return false;
+        else
+            return true;
+    }
+
 
 
 

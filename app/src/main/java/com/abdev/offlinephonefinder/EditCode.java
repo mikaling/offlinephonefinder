@@ -37,7 +37,7 @@ public class EditCode extends AppCompatActivity {
         update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String getFeature = feature.getText().toString();
+
                 String getCode = code.getText().toString();
 
                 OpenSQLiteDatabase();

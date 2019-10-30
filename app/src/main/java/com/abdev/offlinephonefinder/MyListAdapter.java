@@ -58,9 +58,9 @@ public class MyListAdapter extends BaseAdapter {
 
             holder = new Holder();
 
-            holder.ID_TextView = (TextView) child.findViewById(R.id.textViewID);
+            //holder.ID_TextView = (TextView) child.findViewById(R.id.textViewID);
             holder.Feature_TextView = (TextView) child.findViewById(R.id.textViewFEATURE);
-            holder.CodeTextView = (TextView) child.findViewById(R.id.textViewCODE);
+            //holder.CodeTextView = (TextView) child.findViewById(R.id.textViewCODE);
 
             child.setTag(holder);
 
@@ -68,9 +68,9 @@ public class MyListAdapter extends BaseAdapter {
 
             holder = (Holder) child.getTag();
         }
-        holder.ID_TextView.setText(ID.get(position));
+        //holder.ID_TextView.setText(ID.get(position));
         holder.Feature_TextView.setText(Feature.get(position));
-        holder.CodeTextView.setText(Code.get(position));
+        //holder.CodeTextView.setText(Code.get(position));
 
         return child;
     }

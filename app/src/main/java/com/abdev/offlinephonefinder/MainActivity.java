@@ -80,8 +80,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     // The minimum time between updates in milliseconds
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
 
-    //EditText that appears in password dialog
-//    EditText input;
+
     public int pos = 0;
     public AlertDialog.Builder builder;
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -89,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         builder  = new AlertDialog.Builder(MainActivity.this);
-//        input = new EditText(this);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkAndRequestPermissions();
@@ -114,45 +113,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         FEATURE_Array = new ArrayList<String>();
         CODE_Array = new ArrayList<String>();
         databaseHelper = new DatabaseHelper(this);
-        //Alert dialog asks for password before proceeding
-//        public AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
-
-//        builder.setTitle("Enter Password");
-//        builder.setMessage("Please enter your password");
-//        builder.setView(input);
-//        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialogInterface, int i) {
-//                Editable typedPasswordE = input.getText();
-//                typedPassword = typedPasswordE.toString();
-//                SharedPreferences preferences = getSharedPreferences("prefs", MODE_PRIVATE);
-//                String password = preferences.getString("password", null);
-//                //int pos = position;
-//
-//                if (typedPassword.equals(password)){
-//                    correctPassword = true;
-//                    if(pos != 0){
-//                        Intent intent = new Intent(getApplicationContext(), EditCode.class);
-//                        intent.putExtra("ListViewClickedItemValue", ListViewClickItemArray.get(pos).toString());
-//                        startActivity(intent);
-//                    }
-//
-//                }else{
-//                    correctPassword = false;
-////                    Toast.makeText(MainActivity.this, "Wrong password, try again", Toast.LENGTH_SHORT).show();
-////                    Toast.makeText(MainActivity.this, typedPassword, Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
-//        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialogInterface, int i) {
-//
-//            }
-//        });
-
-        //final AlertDialog passwordAlert = builder.create();
 
         LISTVIEW.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 
@@ -160,25 +121,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             public void onItemClick(AdapterView<?> adapterView, View view, final int position, long id) {
                 pos = position;
                 build(position).show();
-
-
-                //passwordAlert.show();
-
-                //while (correctPassword != null){
-//                    if(correctPassword){
-//                        //Toast.makeText(MainActivity.this, "time", Toast.LENGTH_SHORT).show();
-//
-//                        Intent intent = new Intent(getApplicationContext(), EditCode.class);
-//                        intent.putExtra("ListViewClickedItemValue", ListViewClickItemArray.get(position).toString());
-//                        startActivity(intent);
-//                        input.getText().clear();
-//                        correctPassword = null;
-//                        //break;
-//                    }else{
-//                        Toast.makeText(MainActivity.this, "Wrong password, try again", Toast.LENGTH_SHORT).show();
-//                        Toast.makeText(MainActivity.this, typedPassword, Toast.LENGTH_SHORT).show();
-//                        input.getText().clear();
-//                        correctPassword = null;
                     }
                 //}
 
@@ -237,14 +179,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                             MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                 }
 
-//                locationManager.requestLocationUpdates(
-//                        LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES,
-//                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-
-
 
             }else if(codeSpecial.equalsIgnoreCase(contactCode)){
-                Toast.makeText(this, "hereee", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "hereee", Toast.LENGTH_SHORT).show();
                 String name= messageBody.substring(messageBody.indexOf(" ")+1);
                 smsManager.sendTextMessage(Sender, null, ""+fetchContacts(name), null, null);
                 getIntent().removeExtra("sender");
@@ -290,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         LISTVIEW.setAdapter(myListAdapter);
         cursor.close();
-        //Toast.makeText(this, "notworked", Toast.LENGTH_SHORT).show();
+
     }
 
 
@@ -366,17 +303,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 //int pos = position;
 
                 if (typedPassword.equals(password)){
-                    correctPassword = true;
-
                         Intent intent = new Intent(getApplicationContext(), EditCode.class);
                         intent.putExtra("ListViewClickedItemValue", ListViewClickItemArray.get(position).toString());
                         startActivity(intent);
 
 
                 }else{
-                    correctPassword = false;
+
                    Toast.makeText(MainActivity.this, "Wrong password, try again", Toast.LENGTH_SHORT).show();
-//                    Toast.makeText(MainActivity.this, typedPassword, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -487,6 +421,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
 
         }
-        return "not found";
+        return "Contact not found.";
     }
 }
