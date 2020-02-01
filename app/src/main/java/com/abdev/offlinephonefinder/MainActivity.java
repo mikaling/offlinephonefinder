@@ -2,7 +2,9 @@ package com.abdev.offlinephonefinder;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+
 import android.app.ProgressDialog;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,7 +18,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.Uri;
+
 import android.os.AsyncTask;
+
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -39,11 +43,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -59,6 +65,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
@@ -80,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private static final String username ="brunoprogramingweb@gmail.com";
     private static final String password = "145sagana";
+
 
 
     ArrayList<String> ListViewClickItemArray = new ArrayList<String>();
@@ -128,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                  sendMail(email, "Password Reset", "Your current password is: " + oldPassword);
              }
          });
+
 
         //Checking if app has run before
         //If first run, register new user.
@@ -228,11 +237,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 //                AudioManager audio_mngr = (AudioManager) getBaseContext().getSystemService(Context.AUDIO_SERVICE);
 //                audio_mngr .setRingerMode(AudioManager.RINGER_MODE_NORMAL);
 
+
                 String name= messageBody.substring(messageBody.indexOf(" ")+1);
                 smsManager.sendTextMessage(Sender, null, ""+fetchContacts(name), null, null);
                 getIntent().removeExtra("sender");
                 getIntent().removeExtra("message");
                 this.finishAffinity();
+
             }
 
         }
@@ -333,6 +344,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             builder.setTitle("Enter Password");
             builder.setMessage("Please enter your password");
             builder.setIcon(R.drawable.user);
+
             builder.setView(input);
 
 
@@ -533,4 +545,5 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             return null;
         }
     }
+
 }

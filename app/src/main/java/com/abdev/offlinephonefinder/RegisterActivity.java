@@ -46,6 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 SharedPreferences.Editor editor = prefs3.edit();
                                 editor.putString("password", password);
                                 editor.putString("email", email);
+
                                 editor.apply();
                                 Toast.makeText(getApplicationContext(), "Registered successfully", Toast.LENGTH_SHORT).show();
                                 Intent i = new Intent(RegisterActivity.this, MainActivity.class);
